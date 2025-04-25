@@ -17,8 +17,8 @@ root.render(
         <Card />
         <Card />
       </article>
-      <div className="">
-        <RollButtom {...{name: "Abrir Todos", onclick: () => console.log("roll")}} />
+      <div className="flex justify-center ">
+        <RollButtom children={"Open All Packs"}/>
       </div>
     </div>
   </StrictMode>
