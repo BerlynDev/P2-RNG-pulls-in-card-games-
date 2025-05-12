@@ -4,7 +4,7 @@ export function Probabilities () {
 
     const cards = [["a", "b", "c", "d", "e", "f", "g"], ["h", "i", "j", "k", "l", "m"], ["n", "o", "p", "q", "r", "s", "t"], ["u", "v", "w", "x", "y", "z"], "ñ"] 
 
-    const p = [0.40, 0.30, 0.20, 0.10, 0.01]
+    const p = [0.40, 0.30, 0.20, 0.09, 0.01]
 
     //const SubRandomLetter = cards[Math.floor(Math.random() * cards.length)][Math.floor(Math.random() * cards.length)]
 
@@ -28,12 +28,6 @@ export function Probabilities () {
         else {return cards[4][Math.floor(Math.random() * cards[4].length)]}
     }
 
-    for (j=0; j<100; j++) {
-        x = Math.random()
-        i = proba(x)
-        console.log(cards[i])
-    }
-
     return (
         proba(cards)
     )
@@ -51,3 +45,22 @@ https://dustinpfister.github.io/2021/12/24/js-javascript-example-item-probabilit
 Por el momento no esta definido las probabilidades de aparicion, ya que todo depende de x, que es un numero aleatorio, y no de en si el rango de probabilidades
 */   
 
+/*  const weigthedPool = [];
+    for (const rarity in rarities) {
+        const numCards = Math.round(rarities[rarity] * 100);
+        for (let i = 0; i < numCards; i++) {
+            const card = cardPool.find(card => card.rarity === rarity);
+            weigthedPool.push(card);
+        }
+
+    }
+            const randomIndex = Math.floor(Math.random() * weigthedPool.length);
+    const pulledRarity = weightedPool[randomIndex].rarity;
+    const availableCards = cardPool.filter(card => card.rarity === pulledRarity);
+    const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
+    return randomCard;
+
+}  
+
+
+*/  

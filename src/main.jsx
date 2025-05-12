@@ -1,8 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Card } from './components/cards.jsx'
-import { RollButtom } from './components/roll-buttom.jsx'
-
+import { Card } from './components/homepage/cards.jsx'
+import { RollButtom } from './components/homepage/roll-buttom.jsx'
 
 
 const root = createRoot(document.getElementById('root'))

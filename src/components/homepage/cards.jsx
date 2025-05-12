@@ -1,4 +1,4 @@
-import backside_cards from "../assets/backside_cards.webp"
+import backside_cards from "./assets/backside_cards.webp"
 
 export function Card () {
     return (
