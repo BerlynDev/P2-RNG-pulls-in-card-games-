@@ -1,6 +1,6 @@
-import { pulling_cards_function } from "./components/homepage/pulling_cards_function.jsx"
-import { cardPool } from "./components/data/card-pool.jsx"
-import { rarities } from "./components/data/rarities.jsx"
+import { pulling_cards_function } from "./pulling_cards_function.jsx"
+import { cardPool } from "../../components/data/card-pool.jsx"
+import { rarities } from "../../components/data/rarities.jsx"
 
 export function RollButtom ({onclick, children, pulling_cards_function}) {
     return (
