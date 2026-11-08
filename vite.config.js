@@ -6,6 +6,6 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   // './' makes every file link relative, so the built site works from any
-  // folder: GitHub Pages serves it at /P2-RNG-pulls-in-card-games-/, not at /.
+  // folder: GitHub Pages serves it at /gacha-pull-simulator/, not at /.
   base: './',
 })
