@@ -1,6 +1,12 @@
 # Gacha Pull Simulator
 
-**▶ Try it live: https://berlyndev.github.io/gacha-pull-simulator/**
+<p align="center">
+  <a href="https://berlyndev.github.io/gacha-pull-simulator/">
+    <img src="https://img.shields.io/badge/%E2%96%B6%20Play%20now-Gacha%20Pull%20Simulator-6366f1?style=for-the-badge" alt="Play now: Gacha Pull Simulator" height="40">
+  </a>
+  <br>
+  <sub>https://berlyndev.github.io/gacha-pull-simulator/</sub>
+</p>
 
 This is a JavaScript RNG (Random Number Generator) practice: a card pack simulator that shows how "gacha" pulls work, including rarity odds, rare variants and a pity system.
 
