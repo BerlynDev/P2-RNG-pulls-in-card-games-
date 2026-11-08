@@ -1,4 +1,4 @@
-export let cardPool = [
+export const cardPool = [
         {name: "a", rarity: "common"},
         {name: "b", rarity: "common"},
         {name: "c", rarity: "common"},
