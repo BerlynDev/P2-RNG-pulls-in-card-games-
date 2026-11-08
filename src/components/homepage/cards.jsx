@@ -1,33 +1,53 @@
 import backside_cards from "../../assets/backside_cards.webp"
 
-// Colors for each rarity (Tailwind classes).
+// Look of each rarity (Tailwind classes): colors plus a glow that gets
+// stronger the rarer the card is.
 const rarityStyles = {
   common: "bg-slate-200 text-slate-800",
-  rare: "bg-sky-300 text-sky-950",
-  super: "bg-violet-400 text-violet-950",
-  ultra: "bg-amber-300 text-amber-950",
-  omg: "bg-gradient-to-br from-pink-400 via-yellow-300 to-cyan-300 text-black",
+  rare: "bg-sky-300 text-sky-950 shadow-[0_0_15px_rgb(56_189_248/0.6)]",
+  super: "bg-violet-400 text-violet-950 shadow-[0_0_20px_rgb(167_139_250/0.8)]",
+  ultra: "bg-amber-300 text-amber-950 shadow-[0_0_30px_rgb(252_211_77/0.9)]",
+  omg: "bg-[linear-gradient(90deg,#f472b6,#fde047,#67e8f9,#a78bfa,#f472b6)] bg-[length:200%_100%] text-black animate-omg motion-reduce:animate-none",
 }
 
-// Shows the back of the card until `card` has a value, then shows its face.
-export function Card({ card }) {
+// Delay between each card flipping, so they turn over one after another.
+const FLIP_STAGGER_MS = 200
+
+// One card. Both sides exist at the same time, stacked on top of each other:
+// the back faces the viewer, the face is turned around (rotate-y-180).
+// When `card` has a value, the inner box spins 180deg so the face shows.
+export function Card({ card, index = 0 }) {
   return (
-    <article className="bg-indigo-950 flex flex-wrap justify-center p-5">
-      {card ? (
+    <article className="bg-indigo-950 flex justify-center p-5">
+      <div className="w-full perspective-distant transition duration-300 hover:scale-105">
         <div
-          className={`flex aspect-[5/7] w-full flex-col items-center justify-center rounded-xl shadow-xl transition duration-300 hover:scale-105 ${rarityStyles[card.rarity]} ${card.brilliant ? "ring-4 ring-yellow-300" : ""}`}
+          className={`grid transform-3d ${card ? "animate-flip-reveal motion-reduce:animate-none motion-reduce:rotate-y-180" : ""}`}
+          style={card ? { animationDelay: `${index * FLIP_STAGGER_MS}ms` } : undefined}
         >
-          <span className="text-7xl font-bold">{card.name}</span>
-          <span className="mt-2 text-sm font-semibold uppercase tracking-widest">
-            {card.rarity}
-          </span>
-          {card.brilliant && <span className="mt-1 text-xs">✨ brilliant</span>}
+          {/* Back of the card */}
+          <div className="[grid-area:1/1] backface-hidden rounded-xl bg-white p-2 shadow-xl">
+            <img src={backside_cards} alt="Backside of the card" className="p-2" />
+          </div>
+
+          {/* Face of the card (only rendered once a card was pulled) */}
+          {card && (
+            <div
+              className={`[grid-area:1/1] backface-hidden rotate-y-180 relative flex flex-col items-center justify-center overflow-hidden rounded-xl ${rarityStyles[card.rarity]} ${card.brilliant ? "ring-4 ring-yellow-300" : ""}`}
+            >
+              <span className="text-7xl font-bold">{card.name}</span>
+              <span className="mt-2 text-sm font-semibold uppercase tracking-widest">
+                {card.rarity}
+              </span>
+              {card.brilliant && <span className="mt-1 text-xs">✨ brilliant</span>}
+
+              {/* Light sweep for brilliant cards */}
+              {card.brilliant && (
+                <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent animate-shine motion-reduce:hidden" />
+              )}
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="transform rounded-xl bg-white p-2 shadow-xl transition duration-300 hover:scale-105">
-          <img src={backside_cards} alt="Backside of the card" className="p-2" />
-        </div>
-      )}
+      </div>
     </article>
   )
 }
