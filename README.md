@@ -31,25 +31,42 @@ Every card also has its own chance to be **brilliant**, which means uppercase in
 
 Pity puts a ceiling on bad luck. The game counts how many pulls in a row you've gone without a prize. If you reach the limit, that pull is **guaranteed** to give it, and the counter starts again from 0.
 
-| Prize | Guaranteed by |
-|---|---|
-| ✨ Brilliant | pull 10 |
-| Ñ (OMG) | pull 100 |
+| Prize | Type | Guaranteed by |
+|---|---|---|
+| ✨ Brilliant | hard pity | pull 10 |
+| Ultra or better (Ultra or Ñ) | hard pity | pull 10 |
+| Ñ (OMG) | soft + hard pity | soft pity from pull 75, guaranteed at pull 100 |
 
+- **Hard pity:** the chance stays the same until the limit, then the prize is guaranteed.
+- **Soft pity (Ñ):** from pull 75 the Ñ chance climbs by 3.5% on every miss: 3.6% at pull 75, 21.1% at 80, 56.1% at 90, 87.6% at 99. Most Ñ arrive between pulls 75 and 84, and the hard limit at 100 is a safety net.
+- **Ultra-or-better pity:** the forced pull can only be Ultra or Ñ, in their usual proportion (99% Ultra, 1% Ñ). During Ñ soft pity, the boosted Ñ chance carries over to it.
 - The counters carry over between packs. One pull = one card, so a pack of 5 is 5 pulls.
-- Cards forced by pity get a **PITY** tag.
+- Cards forced by pity get a **PITY** tag, and Ñ boosted by soft pity get **SOFT PITY**.
 - Pity can be switched **ON/OFF** to compare. The counters keep counting either way.
-- Because of pity, rare results come out more often than their base odds. With the 100-pull guarantee, Ñ shows up about **1.05%** of the time instead of 0.1%.
+- Because of pity, rare results come out more often than their base odds:
+
+| | Base odds | With pity |
+|---|---|---|
+| Ñ | 0.10% | about 1.3% |
+| Ultra or better | 10% | about 15.9% |
+| Brilliant | 10% | about 15.3% |
+| Brilliant Ñ | 0.01% | about 0.2% |
 
 ### Pull history
 
 The page keeps a history of everything you've pulled:
 - your rate for each rarity next to the base odds
-- how many results pity forced
+- a **showcase slot for the brilliant Ñ**, the rarest card (an Ñ that's also brilliant: 1 in 10,000 pulls without pity)
+- how many results pity forced or boosted
 - a log of every Ñ, with how many pulls since the previous one
 - the last 10 packs
 
 It's saved in your browser (localStorage), so a page refresh doesn't reset your history or your pity. Use **Reset** to start over.
+
+### Export
+
+- **Export CSV:** one row per pull (`pull, pack, card, rarity, brilliant, pity`), ready for Excel or Google Sheets. Keeps the last 100,000 pulls.
+- **Export JSON:** the whole history, as a backup or to analyse in code.
 
 ## Getting started
 
@@ -76,8 +93,9 @@ pnpm dev              # start the dev server, then open the URL it prints
 | What | Where |
 |---|---|
 | Rarity chances and brilliant chance | `src/components/data/rarities.js` (the rarity chances must add up to 1) |
-| Pity limits | `src/components/data/pity.js` |
+| Pity limits, soft pity start and step | `src/components/data/pity.js` |
 | Which letter has which rarity | `src/components/data/card-pool.js` |
+| Cards per pack | `src/components/data/pack.js` |
 
 After changing anything, run `pnpm odds` to check the results match.
 
@@ -90,15 +108,19 @@ src/
 ├── styles.css                      # Tailwind + custom animations
 ├── hooks/
 │   └── usePullHistory.js           # history + pity counters, saved in localStorage
+├── utils/
+│   ├── pullLog.js                  # compact format for every pull ("a", "H:b", "Ñ:s")
+│   └── exportHistory.js            # CSV / JSON export and file download
 └── components/
-    ├── data/                       # card pool, odds and pity rules
+    ├── data/                       # card pool, odds, pity rules and pack size
     ├── homepage/
-    │   ├── pulling_cards_function.js   # the RNG: rarity roll, brilliant roll, pity
+    │   ├── pulling_cards_function.js   # the RNG: rarity roll, brilliant roll, soft and hard pity
     │   ├── cards.jsx                   # card with flip animation and rarity effects
     │   └── roll-buttom.jsx             # "Open All Packs" button
     └── history/
         ├── PityPanel.jsx               # pity meters and ON/OFF switch
-        └── PullHistory.jsx             # stats, Ñ log and recent packs
+        ├── PullHistory.jsx             # stats, export buttons, Ñ log and recent packs
+        └── BrilliantOmgSlot.jsx        # showcase slot for the brilliant Ñ
 scripts/
 └── check-odds.js                   # the `pnpm odds` simulation
 ```
@@ -109,5 +131,7 @@ scripts/
 - [x] The visuals of the packs
 - [x] Pull history
 - [x] Pity system (hard pity)
-- [ ] Soft pity: the Ñ chance climbs with every miss after a certain pull
-- [ ] Pity for ultra or better every 10 pulls
+- [x] Soft pity: the Ñ chance climbs with every miss after pull 75
+- [x] Pity for ultra or better every 10 pulls
+- [x] Export history (CSV / JSON)
+- [x] Showcase slot for the brilliant Ñ

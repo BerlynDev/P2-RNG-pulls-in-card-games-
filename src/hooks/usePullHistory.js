@@ -1,29 +1,45 @@
 import { useEffect, useState } from "react"
 import { START_PITY } from "../components/data/pity.js"
+import { encodePull } from "../utils/pullLog.js"
 
 // Everything is saved in the browser (localStorage), so history and pity
 // counters survive a page refresh. "v1" lets us change the format later
 // without reading old, incompatible data.
 const STORAGE_KEY = "rng-card-game:history:v1"
-const MAX_SAVED_PACKS = 50 // only the most recent packs are kept in the list
+const MAX_SAVED_PACKS = 50   // only the most recent packs are kept in the list
+const MAX_LOGGED_PULLS = 100_000 // the full pull log keeps this many (about 300 KB)
 
 const EMPTY_HISTORY = {
   totalPacks: 0,
   totalCards: 0,
   rarityCounts: {},                    // { common: 12, rare: 7, ... }
   brilliantCount: 0,
-  pityTriggers: { omg: 0, brilliant: 0 }, // how many times pity forced a result
-  omgPulls: [],                        // every Ñ: { pullNumber, pity }
+  // How many times pity helped: omg = hard pity (guaranteed), omgSoft = soft pity (boosted)
+  pityTriggers: { brilliant: 0, ultra: 0, omg: 0, omgSoft: 0 },
+  omgPulls: [],                        // every Ñ: { pullNumber, pity: false | "soft" | "hard", brilliant }
   pity: START_PITY,                    // current counters
   pityEnabled: true,
   recentPacks: [],                     // newest first: { packNumber, cards }
+  pullLog: [],                         // every pull, oldest first, e.g. ["a", "H", "Ñ:s"] (see utils/pullLog.js)
+  pullLogStart: 1,                     // pull number of pullLog[0]
 }
 
 // Reading storage can fail (private mode, blocked storage), so always fall back.
+// Nested objects are merged too, so history saved by an older version of the
+// app still gets any counters that were added later.
 function loadHistory() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? { ...EMPTY_HISTORY, ...JSON.parse(saved) } : EMPTY_HISTORY
+    if (!saved) return EMPTY_HISTORY
+    const data = JSON.parse(saved)
+    return {
+      ...EMPTY_HISTORY,
+      ...data,
+      pity: { ...EMPTY_HISTORY.pity, ...data.pity },
+      pityTriggers: { ...EMPTY_HISTORY.pityTriggers, ...data.pityTriggers },
+      // History from before the pull log existed: the log starts at the next pull.
+      pullLogStart: data.pullLog ? data.pullLogStart : (data.totalCards ?? 0) + 1,
+    }
   } catch {
     return EMPTY_HISTORY
   }
@@ -53,12 +69,24 @@ export function usePullHistory() {
       cards.forEach((card, i) => {
         rarityCounts[card.rarity] = (rarityCounts[card.rarity] ?? 0) + 1
         if (card.brilliant) brilliantCount++
-        if (card.pity.omg) pityTriggers.omg++
+        if (card.pity.omg === "hard") pityTriggers.omg++
+        if (card.pity.omg === "soft") pityTriggers.omgSoft++
         if (card.pity.brilliant) pityTriggers.brilliant++
+        if (card.pity.ultra) pityTriggers.ultra++
         if (card.rarity === "omg") {
-          omgPulls.push({ pullNumber: h.totalCards + i + 1, pity: card.pity.omg })
+          omgPulls.push({ pullNumber: h.totalCards + i + 1, pity: card.pity.omg, brilliant: card.brilliant })
         }
       })
+
+      // Add this pack to the full log. If it gets too long, drop the oldest
+      // pulls and move the start number forward so pull numbers stay right.
+      let pullLog = [...h.pullLog, ...cards.map(encodePull)]
+      let pullLogStart = h.pullLogStart
+      const overflow = pullLog.length - MAX_LOGGED_PULLS
+      if (overflow > 0) {
+        pullLog = pullLog.slice(overflow)
+        pullLogStart += overflow
+      }
 
       const packNumber = h.totalPacks + 1
       return {
@@ -71,6 +99,8 @@ export function usePullHistory() {
         omgPulls,
         pity: newPity,
         recentPacks: [{ packNumber, cards }, ...h.recentPacks].slice(0, MAX_SAVED_PACKS),
+        pullLog,
+        pullLogStart,
       }
     })
   }

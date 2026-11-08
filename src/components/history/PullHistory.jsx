@@ -1,4 +1,6 @@
 import { rarities, BRILLIANT_CHANCE } from "../data/rarities.js"
+import { exportCsv, exportJson } from "../../utils/exportHistory.js"
+import { BrilliantOmgSlot } from "./BrilliantOmgSlot.jsx"
 
 // Small colored chip per card in the history list.
 const chipStyles = {
@@ -11,10 +13,15 @@ const chipStyles = {
 
 const RECENT_PACKS_SHOWN = 10
 
+const smallButton = "rounded-lg border border-indigo-400 px-3 py-1 text-xs text-indigo-200 hover:bg-indigo-900"
+
 const percent = (count, total) => (total === 0 ? "—" : `${((count / total) * 100).toFixed(1)}%`)
 
 export function PullHistory({ history, onReset }) {
   const { totalPacks, totalCards, rarityCounts, brilliantCount, pityTriggers, omgPulls, recentPacks } = history
+
+  // Ñ pulls saved before this feature have no `brilliant` field, so they count as not brilliant.
+  const brilliantOmgCount = omgPulls.filter((omg) => omg.brilliant).length
 
   if (totalCards === 0) {
     return (
@@ -28,18 +35,32 @@ export function PullHistory({ history, onReset }) {
     <section className="mx-auto my-6 w-full max-w-xl rounded-xl bg-indigo-950 p-4 text-white">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-bold">Pull history</h2>
-        <button
-          onClick={() => {
-            if (window.confirm("Delete all pull history and reset pity counters?")) onReset()
-          }}
-          className="rounded-lg border border-indigo-400 px-3 py-1 text-xs text-indigo-200 hover:bg-indigo-900"
-        >
-          Reset
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => exportCsv(history)} title="One row per pull, for Excel or Google Sheets" className={smallButton}>
+            Export CSV
+          </button>
+          <button onClick={() => exportJson(history)} title="Everything, as a backup or for code" className={smallButton}>
+            Export JSON
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm("Delete all pull history and reset pity counters?")) onReset()
+            }}
+            className={smallButton}
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
       <p className="mb-3 text-sm text-indigo-200">
         {totalPacks} packs · {totalCards} cards
+        {/* History from before the pull log existed can't be exported pull by pull */}
+        {history.pullLogStart > 1 && (
+          <span className="block text-xs text-indigo-300">
+            Exports include pulls from #{history.pullLogStart} on.
+          </span>
+        )}
       </p>
 
       {/* Your rates vs the base odds */}
@@ -67,11 +88,21 @@ export function PullHistory({ history, onReset }) {
             <td className="py-1 text-right tabular-nums">{percent(brilliantCount, totalCards)}</td>
             <td className="py-1 text-right tabular-nums text-indigo-300">{(BRILLIANT_CHANCE * 100).toFixed(1)}%</td>
           </tr>
+          <tr className="border-t border-indigo-900">
+            <td className="py-1">✨ Brilliant Ñ</td>
+            <td className="py-1 text-right tabular-nums">{brilliantOmgCount}</td>
+            <td className="py-1 text-right tabular-nums">{percent(brilliantOmgCount, totalCards)}</td>
+            <td className="py-1 text-right tabular-nums text-indigo-300">{(rarities.omg * BRILLIANT_CHANCE * 100).toFixed(2)}%</td>
+          </tr>
         </tbody>
       </table>
 
+      <BrilliantOmgSlot omgPulls={omgPulls} />
+
       <p className="mt-3 text-sm text-indigo-200">
-        Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"} and {pityTriggers.omg} Ñ.
+        Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"},
+        {" "}{pityTriggers.ultra} ultra-or-better and {pityTriggers.omg} Ñ (hard pity).
+        {" "}Soft pity helped with {pityTriggers.omgSoft} Ñ.
       </p>
 
       {/* Every Ñ ever pulled */}
@@ -80,10 +111,12 @@ export function PullHistory({ history, onReset }) {
           <h3 className="text-sm font-semibold">Ñ pulls</h3>
           <ul className="mt-1 flex flex-wrap gap-2 text-xs">
             {omgPulls.map((omg, i) => (
-              <li key={omg.pullNumber} className="rounded bg-indigo-900 px-2 py-1">
-                #{i + 1} at pull {omg.pullNumber}
+              <li key={omg.pullNumber} className={`rounded px-2 py-1 ${omg.brilliant ? "bg-yellow-300/20 ring-1 ring-yellow-300" : "bg-indigo-900"}`}>
+                {omg.brilliant && "✨ "}#{i + 1} at pull {omg.pullNumber}
                 {i > 0 && ` (+${omg.pullNumber - omgPulls[i - 1].pullNumber})`}
-                {omg.pity && <span className="ml-1 font-bold text-yellow-300">PITY</span>}
+                {/* true = hard pity saved by an older version of the app */}
+                {(omg.pity === "hard" || omg.pity === true) && <span className="ml-1 font-bold text-yellow-300">PITY</span>}
+                {omg.pity === "soft" && <span className="ml-1 font-bold text-pink-300">SOFT PITY</span>}
               </li>
             ))}
           </ul>
@@ -99,8 +132,8 @@ export function PullHistory({ history, onReset }) {
             {pack.cards.map((card, i) => (
               <span
                 key={i}
-                title={`${card.rarity}${card.brilliant ? ", brilliant" : ""}${card.pity?.omg || card.pity?.brilliant ? ", forced by pity" : ""}`}
-                className={`flex h-7 w-7 items-center justify-center rounded text-sm font-bold ${chipStyles[card.rarity]} ${card.brilliant ? "ring-2 ring-yellow-300" : ""} ${card.pity?.omg || card.pity?.brilliant ? "outline-2 outline-offset-2 outline-dashed outline-yellow-300" : ""}`}
+                title={`${card.rarity}${card.brilliant ? ", brilliant" : ""}${card.pity?.omg || card.pity?.brilliant || card.pity?.ultra ? ", forced by pity" : ""}`}
+                className={`flex h-7 w-7 items-center justify-center rounded text-sm font-bold ${chipStyles[card.rarity]} ${card.brilliant ? "ring-2 ring-yellow-300" : ""} ${card.pity?.omg || card.pity?.brilliant || card.pity?.ultra ? "outline-2 outline-offset-2 outline-dashed outline-yellow-300" : ""}`}
               >
                 {card.name}
               </span>
