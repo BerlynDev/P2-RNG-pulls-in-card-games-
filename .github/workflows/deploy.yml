@@ -1,0 +1,66 @@
+# Builds the site and publishes it to GitHub Pages.
+# Runs on every push to main (so every merged PR goes live), and can also be
+# started by hand from the repo's Actions tab ("Run workflow").
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The minimum rights this workflow needs: read the code, publish to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If two deploys start close together, finish the running one and skip the
+# ones waiting in between, so the newest code always wins.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v7
+
+      - name: Install pnpm (version from package.json "packageManager")
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          cache: true
+
+      - name: Install Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Install dependencies (exactly what pnpm-lock.yaml says)
+        run: pnpm install --frozen-lockfile
+
+      - name: Check the code
+        run: pnpm lint
+
+      - name: Build the site
+        run: pnpm build
+
+      - name: Prepare Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload the built site (the dist folder)
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
