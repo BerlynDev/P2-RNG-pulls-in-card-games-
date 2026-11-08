@@ -40,6 +40,13 @@ export function Card({ card, index = 0 }) {
               </span>
               {card.brilliant && <span className="mt-1 text-xs">✨ brilliant</span>}
 
+              {/* Tag for results that pity forced */}
+              {(card.pity?.omg || card.pity?.brilliant) && (
+                <span className="absolute top-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-yellow-300">
+                  PITY
+                </span>
+              )}
+
               {/* Light sweep for brilliant cards */}
               {card.brilliant && (
                 <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent animate-shine motion-reduce:hidden" />
