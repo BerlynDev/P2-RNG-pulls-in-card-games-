@@ -12,7 +12,7 @@ Important notes:
     - ABCDEFG: Common rarity (C) - 40%
     - HIJKLM: Rare rarity (R) - 30%
     - NOPQRST: Super rarity (S) - 20%
-    - UVWXYZ: Ultra rarity (S) - 9.9%
+    - UVWXYZ: Ultra rarity (U) - 9.9%
     - Ñ: OMG rarity (OMG) - 0.1%
 
 Each pack contains 5 cards,and each cards has independent odds of being any rarity. Also, there is also a chance for a card to be "brilliant" -- that is, uppercase instead of lowercase:
