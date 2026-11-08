@@ -12,18 +12,28 @@ const EMPTY_HISTORY = {
   totalCards: 0,
   rarityCounts: {},                    // { common: 12, rare: 7, ... }
   brilliantCount: 0,
-  pityTriggers: { omg: 0, brilliant: 0 }, // how many times pity forced a result
-  omgPulls: [],                        // every Ñ: { pullNumber, pity }
+  // How many times pity helped: omg = hard pity (guaranteed), omgSoft = soft pity (boosted)
+  pityTriggers: { brilliant: 0, omg: 0, omgSoft: 0 },
+  omgPulls: [],                        // every Ñ: { pullNumber, pity: false | "soft" | "hard" }
   pity: START_PITY,                    // current counters
   pityEnabled: true,
   recentPacks: [],                     // newest first: { packNumber, cards }
 }
 
 // Reading storage can fail (private mode, blocked storage), so always fall back.
+// Nested objects are merged too, so history saved by an older version of the
+// app still gets any counters that were added later.
 function loadHistory() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? { ...EMPTY_HISTORY, ...JSON.parse(saved) } : EMPTY_HISTORY
+    if (!saved) return EMPTY_HISTORY
+    const data = JSON.parse(saved)
+    return {
+      ...EMPTY_HISTORY,
+      ...data,
+      pity: { ...EMPTY_HISTORY.pity, ...data.pity },
+      pityTriggers: { ...EMPTY_HISTORY.pityTriggers, ...data.pityTriggers },
+    }
   } catch {
     return EMPTY_HISTORY
   }
@@ -53,7 +63,8 @@ export function usePullHistory() {
       cards.forEach((card, i) => {
         rarityCounts[card.rarity] = (rarityCounts[card.rarity] ?? 0) + 1
         if (card.brilliant) brilliantCount++
-        if (card.pity.omg) pityTriggers.omg++
+        if (card.pity.omg === "hard") pityTriggers.omg++
+        if (card.pity.omg === "soft") pityTriggers.omgSoft++
         if (card.pity.brilliant) pityTriggers.brilliant++
         if (card.rarity === "omg") {
           omgPulls.push({ pullNumber: h.totalCards + i + 1, pity: card.pity.omg })

@@ -71,7 +71,8 @@ export function PullHistory({ history, onReset }) {
       </table>
 
       <p className="mt-3 text-sm text-indigo-200">
-        Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"} and {pityTriggers.omg} Ñ.
+        Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"} and {pityTriggers.omg} Ñ
+        {" "}(hard pity). Soft pity helped with {pityTriggers.omgSoft} Ñ.
       </p>
 
       {/* Every Ñ ever pulled */}
@@ -83,7 +84,9 @@ export function PullHistory({ history, onReset }) {
               <li key={omg.pullNumber} className="rounded bg-indigo-900 px-2 py-1">
                 #{i + 1} at pull {omg.pullNumber}
                 {i > 0 && ` (+${omg.pullNumber - omgPulls[i - 1].pullNumber})`}
-                {omg.pity && <span className="ml-1 font-bold text-yellow-300">PITY</span>}
+                {/* true = hard pity saved by an older version of the app */}
+                {(omg.pity === "hard" || omg.pity === true) && <span className="ml-1 font-bold text-yellow-300">PITY</span>}
+                {omg.pity === "soft" && <span className="ml-1 font-bold text-pink-300">SOFT PITY</span>}
               </li>
             ))}
           </ul>
