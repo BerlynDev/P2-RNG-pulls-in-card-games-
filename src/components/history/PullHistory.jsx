@@ -1,5 +1,6 @@
 import { rarities, BRILLIANT_CHANCE } from "../data/rarities.js"
 import { exportCsv, exportJson } from "../../utils/exportHistory.js"
+import { BrilliantOmgSlot } from "./BrilliantOmgSlot.jsx"
 
 // Small colored chip per card in the history list.
 const chipStyles = {
@@ -18,6 +19,9 @@ const percent = (count, total) => (total === 0 ? "—" : `${((count / total) * 1
 
 export function PullHistory({ history, onReset }) {
   const { totalPacks, totalCards, rarityCounts, brilliantCount, pityTriggers, omgPulls, recentPacks } = history
+
+  // Ñ pulls saved before this feature have no `brilliant` field, so they count as not brilliant.
+  const brilliantOmgCount = omgPulls.filter((omg) => omg.brilliant).length
 
   if (totalCards === 0) {
     return (
@@ -84,8 +88,16 @@ export function PullHistory({ history, onReset }) {
             <td className="py-1 text-right tabular-nums">{percent(brilliantCount, totalCards)}</td>
             <td className="py-1 text-right tabular-nums text-indigo-300">{(BRILLIANT_CHANCE * 100).toFixed(1)}%</td>
           </tr>
+          <tr className="border-t border-indigo-900">
+            <td className="py-1">✨ Brilliant Ñ</td>
+            <td className="py-1 text-right tabular-nums">{brilliantOmgCount}</td>
+            <td className="py-1 text-right tabular-nums">{percent(brilliantOmgCount, totalCards)}</td>
+            <td className="py-1 text-right tabular-nums text-indigo-300">{(rarities.omg * BRILLIANT_CHANCE * 100).toFixed(2)}%</td>
+          </tr>
         </tbody>
       </table>
+
+      <BrilliantOmgSlot omgPulls={omgPulls} />
 
       <p className="mt-3 text-sm text-indigo-200">
         Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"},
@@ -99,8 +111,8 @@ export function PullHistory({ history, onReset }) {
           <h3 className="text-sm font-semibold">Ñ pulls</h3>
           <ul className="mt-1 flex flex-wrap gap-2 text-xs">
             {omgPulls.map((omg, i) => (
-              <li key={omg.pullNumber} className="rounded bg-indigo-900 px-2 py-1">
-                #{i + 1} at pull {omg.pullNumber}
+              <li key={omg.pullNumber} className={`rounded px-2 py-1 ${omg.brilliant ? "bg-yellow-300/20 ring-1 ring-yellow-300" : "bg-indigo-900"}`}>
+                {omg.brilliant && "✨ "}#{i + 1} at pull {omg.pullNumber}
                 {i > 0 && ` (+${omg.pullNumber - omgPulls[i - 1].pullNumber})`}
                 {/* true = hard pity saved by an older version of the app */}
                 {(omg.pity === "hard" || omg.pity === true) && <span className="ml-1 font-bold text-yellow-300">PITY</span>}

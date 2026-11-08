@@ -18,6 +18,7 @@ function simulate(rules) {
   for (const card of cards) {
     counts[card.rarity] = (counts[card.rarity] ?? 0) + 1
     if (card.brilliant) counts.brilliant++
+    if (card.brilliant && card.rarity === "omg") counts.brilliantOmg = (counts.brilliantOmg ?? 0) + 1
   }
   return counts
 }
@@ -66,6 +67,15 @@ rows.push({
   "Got (no pity)": pct(noPity.brilliant / PULLS),
   "Got (pity)": pct(withPity.brilliant / PULLS),
   "Predicted (pity)": pct(predictedRate(BRILLIANT_CHANCE, PITY_RULES.brilliant)),
+})
+
+// Brilliant Ñ needs both on the same pull, so the base chances multiply.
+rows.push({
+  Rarity: "brilliant Ñ",
+  "Base odds": pct(rarities.omg * BRILLIANT_CHANCE),
+  "Got (no pity)": pct((noPity.brilliantOmg ?? 0) / PULLS),
+  "Got (pity)": pct((withPity.brilliantOmg ?? 0) / PULLS),
+  "Predicted (pity)": "",
 })
 
 const total = Object.values(rarities).reduce((a, b) => a + b, 0)
