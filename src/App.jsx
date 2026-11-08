@@ -7,6 +7,7 @@ import { rarities } from "./components/data/rarities.js"
 import { PITY_RULES } from "./components/data/pity.js"
 import { PityPanel } from "./components/history/PityPanel.jsx"
 import { PullHistory } from "./components/history/PullHistory.jsx"
+import { RateChart } from "./components/history/RateChart.jsx"
 import { usePullHistory } from "./hooks/usePullHistory.js"
 import { PACK_SIZE } from "./components/data/pack.js"
 
@@ -53,6 +54,7 @@ export function App() {
       </div>
       <PityPanel pity={history.pity} enabled={history.pityEnabled} onToggle={setPityEnabled} />
       <PullHistory history={history} onReset={resetHistory} />
+      <RateChart history={history} />
     </div>
   )
 }
