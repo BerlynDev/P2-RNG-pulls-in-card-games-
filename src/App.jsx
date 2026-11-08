@@ -8,6 +8,7 @@ import { PITY_RULES } from "./components/data/pity.js"
 import { PityPanel } from "./components/history/PityPanel.jsx"
 import { PullHistory } from "./components/history/PullHistory.jsx"
 import { RateChart } from "./components/history/RateChart.jsx"
+import { OddsExplainer } from "./components/explainer/OddsExplainer.jsx"
 import { usePullHistory } from "./hooks/usePullHistory.js"
 import { PACK_SIZE } from "./components/data/pack.js"
 
@@ -52,9 +53,15 @@ export function App() {
         <RollButtom onClick={() => openPacks(1)}>Open 1 Pack · 5 cards</RollButtom>
         <RollButtom onClick={() => openPacks(2)}>Open 2 Packs · 10 cards</RollButtom>
       </div>
+      <p className="mt-3 text-center text-sm">
+        <a href="#how-the-odds-work" className="text-indigo-700 underline underline-offset-2 hover:text-indigo-950">
+          How do the odds work?
+        </a>
+      </p>
       <PityPanel pity={history.pity} enabled={history.pityEnabled} onToggle={setPityEnabled} />
       <PullHistory history={history} onReset={resetHistory} />
       <RateChart history={history} />
+      <OddsExplainer />
     </div>
   )
 }
