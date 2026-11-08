@@ -8,7 +8,9 @@ Built with **Vite + React + Tailwind CSS**.
 
 The card pool is the entire alphabet. Each letter is a card that can be pulled by the RNG.
 
-Click **Open All Packs** to open a pack of **5 cards**. Each card rolls its odds independently, then flips over to show what you got.
+Click **Open 1 Pack** for **5 cards**, or **Open 2 Packs** for **10 cards** at once. Each card rolls its odds independently, then flips over to show what you got.
+
+New to gacha odds? The page has a **How the odds work** section that explains every rate in plain language, with no math background needed.
 
 ### Rarities
 
@@ -45,12 +47,14 @@ Pity puts a ceiling on bad luck. The game counts how many pulls in a row you've 
 - Pity can be switched **ON/OFF** to compare. The counters keep counting either way.
 - Because of pity, rare results come out more often than their base odds:
 
-| | Base odds | With pity |
+| | Base odds | Real rate with pity |
 |---|---|---|
-| Ñ | 0.10% | about 1.3% |
-| Ultra or better | 10% | about 15.9% |
-| Brilliant | 10% | about 15.3% |
-| Brilliant Ñ | 0.01% | about 0.2% |
+| Ñ | 0.10% (1 in 1,000) | 1.33% (1 in 75) |
+| Ultra or better | 10% (1 in 10) | 15.9% (1 in 6.3) |
+| Brilliant | 10% (1 in 10) | 15.4% (1 in 6.5) |
+| Brilliant Ñ | 0.01% (1 in 10,000) | 0.20% (1 in 491) |
+
+These real rates are calculated exactly in `src/utils/rates.js`, and `pnpm odds` confirms them by simulating a million pulls.
 
 ### Pull history
 
@@ -62,6 +66,10 @@ The page keeps a history of everything you've pulled:
 - the last 10 packs
 
 It's saved in your browser (localStorage), so a page refresh doesn't reset your history or your pity. Use **Reset** to start over.
+
+### Rate chart
+
+A line chart of your running rate for Ñ, ultra or better, brilliant or brilliant Ñ, with the expected rate with pity (dashed) and the base odds (dotted). Early on the line jumps around; the more you pull, the closer it settles. Hover over it, or use the arrow keys, to see the value at any pull. **Show as table** lists the same data.
 
 ### Export
 
@@ -110,17 +118,21 @@ src/
 │   └── usePullHistory.js           # history + pity counters, saved in localStorage
 ├── utils/
 │   ├── pullLog.js                  # compact format for every pull ("a", "H:b", "Ñ:s")
-│   └── exportHistory.js            # CSV / JSON export and file download
+│   ├── exportHistory.js            # CSV / JSON export and file download
+│   └── rates.js                    # exact expected rates with pity (used by the chart, explainer and pnpm odds)
 └── components/
     ├── data/                       # card pool, odds, pity rules and pack size
     ├── homepage/
     │   ├── pulling_cards_function.js   # the RNG: rarity roll, brilliant roll, soft and hard pity
     │   ├── cards.jsx                   # card with flip animation and rarity effects
-    │   └── roll-buttom.jsx             # "Open All Packs" button
-    └── history/
-        ├── PityPanel.jsx               # pity meters and ON/OFF switch
-        ├── PullHistory.jsx             # stats, export buttons, Ñ log and recent packs
-        └── BrilliantOmgSlot.jsx        # showcase slot for the brilliant Ñ
+    │   └── roll-buttom.jsx             # the "Open pack" buttons
+    ├── history/
+    │   ├── PityPanel.jsx               # pity meters and ON/OFF switch
+    │   ├── PullHistory.jsx             # stats, export buttons, Ñ log and recent packs
+    │   ├── BrilliantOmgSlot.jsx        # showcase slot for the brilliant Ñ
+    │   └── RateChart.jsx               # your rates over time
+    └── explainer/
+        └── OddsExplainer.jsx           # "How the odds work", in plain language
 scripts/
 └── check-odds.js                   # the `pnpm odds` simulation
 ```
@@ -135,3 +147,6 @@ scripts/
 - [x] Pity for ultra or better every 10 pulls
 - [x] Export history (CSV / JSON)
 - [x] Showcase slot for the brilliant Ñ
+- [x] Open 2 packs (10 cards) at once
+- [x] Rate chart
+- [x] Plain-language explanation of every rate

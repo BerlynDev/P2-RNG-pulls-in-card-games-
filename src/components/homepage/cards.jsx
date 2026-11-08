@@ -16,13 +16,13 @@ const FLIP_STAGGER_MS = 200
 // One card. Both sides exist at the same time, stacked on top of each other:
 // the back faces the viewer, the face is turned around (rotate-y-180).
 // When `card` has a value, the inner box spins 180deg so the face shows.
-export function Card({ card, index = 0 }) {
+export function Card({ card, index = 0, stagger = FLIP_STAGGER_MS }) {
   return (
     <article className="bg-indigo-950 flex justify-center p-5">
       <div className="w-full perspective-distant transition duration-300 hover:scale-105">
         <div
           className={`grid transform-3d ${card ? "animate-flip-reveal motion-reduce:animate-none motion-reduce:rotate-y-180" : ""}`}
-          style={card ? { animationDelay: `${index * FLIP_STAGGER_MS}ms` } : undefined}
+          style={card ? { animationDelay: `${index * stagger}ms` } : undefined}
         >
           {/* Back of the card */}
           <div className="[grid-area:1/1] backface-hidden rounded-xl bg-white p-2 shadow-xl">
