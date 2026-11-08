@@ -8,8 +8,7 @@ import { PITY_RULES } from "./components/data/pity.js"
 import { PityPanel } from "./components/history/PityPanel.jsx"
 import { PullHistory } from "./components/history/PullHistory.jsx"
 import { usePullHistory } from "./hooks/usePullHistory.js"
-
-const PACK_SIZE = 5
+import { PACK_SIZE } from "./components/data/pack.js"
 
 export function App() {
   // null = no pack opened since the page loaded, so every card shows its back.

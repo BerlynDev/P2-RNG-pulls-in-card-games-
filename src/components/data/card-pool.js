@@ -25,5 +25,5 @@ export const cardPool = [
         {name: "x", rarity: "ultra"},
         {name: "y", rarity: "ultra"},
         {name: "z", rarity: "ultra"},
-        {name: "ñ", rarity: "omg"}
+        {name: "ñ", rarity: "omg"}
     ]

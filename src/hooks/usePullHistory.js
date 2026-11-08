@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react"
 import { START_PITY } from "../components/data/pity.js"
+import { encodePull } from "../utils/pullLog.js"
 
 // Everything is saved in the browser (localStorage), so history and pity
 // counters survive a page refresh. "v1" lets us change the format later
 // without reading old, incompatible data.
 const STORAGE_KEY = "rng-card-game:history:v1"
-const MAX_SAVED_PACKS = 50 // only the most recent packs are kept in the list
+const MAX_SAVED_PACKS = 50   // only the most recent packs are kept in the list
+const MAX_LOGGED_PULLS = 100_000 // the full pull log keeps this many (about 300 KB)
 
 const EMPTY_HISTORY = {
   totalPacks: 0,
@@ -18,6 +20,8 @@ const EMPTY_HISTORY = {
   pity: START_PITY,                    // current counters
   pityEnabled: true,
   recentPacks: [],                     // newest first: { packNumber, cards }
+  pullLog: [],                         // every pull, oldest first, e.g. ["a", "H", "Ñ:s"] (see utils/pullLog.js)
+  pullLogStart: 1,                     // pull number of pullLog[0]
 }
 
 // Reading storage can fail (private mode, blocked storage), so always fall back.
@@ -33,6 +37,8 @@ function loadHistory() {
       ...data,
       pity: { ...EMPTY_HISTORY.pity, ...data.pity },
       pityTriggers: { ...EMPTY_HISTORY.pityTriggers, ...data.pityTriggers },
+      // History from before the pull log existed: the log starts at the next pull.
+      pullLogStart: data.pullLog ? data.pullLogStart : (data.totalCards ?? 0) + 1,
     }
   } catch {
     return EMPTY_HISTORY
@@ -72,6 +78,16 @@ export function usePullHistory() {
         }
       })
 
+      // Add this pack to the full log. If it gets too long, drop the oldest
+      // pulls and move the start number forward so pull numbers stay right.
+      let pullLog = [...h.pullLog, ...cards.map(encodePull)]
+      let pullLogStart = h.pullLogStart
+      const overflow = pullLog.length - MAX_LOGGED_PULLS
+      if (overflow > 0) {
+        pullLog = pullLog.slice(overflow)
+        pullLogStart += overflow
+      }
+
       const packNumber = h.totalPacks + 1
       return {
         ...h,
@@ -83,6 +99,8 @@ export function usePullHistory() {
         omgPulls,
         pity: newPity,
         recentPacks: [{ packNumber, cards }, ...h.recentPacks].slice(0, MAX_SAVED_PACKS),
+        pullLog,
+        pullLogStart,
       }
     })
   }

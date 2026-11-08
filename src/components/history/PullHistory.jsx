@@ -1,4 +1,5 @@
 import { rarities, BRILLIANT_CHANCE } from "../data/rarities.js"
+import { exportCsv, exportJson } from "../../utils/exportHistory.js"
 
 // Small colored chip per card in the history list.
 const chipStyles = {
@@ -10,6 +11,8 @@ const chipStyles = {
 }
 
 const RECENT_PACKS_SHOWN = 10
+
+const smallButton = "rounded-lg border border-indigo-400 px-3 py-1 text-xs text-indigo-200 hover:bg-indigo-900"
 
 const percent = (count, total) => (total === 0 ? "—" : `${((count / total) * 100).toFixed(1)}%`)
 
@@ -28,18 +31,32 @@ export function PullHistory({ history, onReset }) {
     <section className="mx-auto my-6 w-full max-w-xl rounded-xl bg-indigo-950 p-4 text-white">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-lg font-bold">Pull history</h2>
-        <button
-          onClick={() => {
-            if (window.confirm("Delete all pull history and reset pity counters?")) onReset()
-          }}
-          className="rounded-lg border border-indigo-400 px-3 py-1 text-xs text-indigo-200 hover:bg-indigo-900"
-        >
-          Reset
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => exportCsv(history)} title="One row per pull, for Excel or Google Sheets" className={smallButton}>
+            Export CSV
+          </button>
+          <button onClick={() => exportJson(history)} title="Everything, as a backup or for code" className={smallButton}>
+            Export JSON
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm("Delete all pull history and reset pity counters?")) onReset()
+            }}
+            className={smallButton}
+          >
+            Reset
+          </button>
+        </div>
       </div>
 
       <p className="mb-3 text-sm text-indigo-200">
         {totalPacks} packs · {totalCards} cards
+        {/* History from before the pull log existed can't be exported pull by pull */}
+        {history.pullLogStart > 1 && (
+          <span className="block text-xs text-indigo-300">
+            Exports include pulls from #{history.pullLogStart} on.
+          </span>
+        )}
       </p>
 
       {/* Your rates vs the base odds */}
