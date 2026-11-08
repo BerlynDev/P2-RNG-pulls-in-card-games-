@@ -13,7 +13,7 @@ const EMPTY_HISTORY = {
   rarityCounts: {},                    // { common: 12, rare: 7, ... }
   brilliantCount: 0,
   // How many times pity helped: omg = hard pity (guaranteed), omgSoft = soft pity (boosted)
-  pityTriggers: { brilliant: 0, omg: 0, omgSoft: 0 },
+  pityTriggers: { brilliant: 0, ultra: 0, omg: 0, omgSoft: 0 },
   omgPulls: [],                        // every Ñ: { pullNumber, pity: false | "soft" | "hard" }
   pity: START_PITY,                    // current counters
   pityEnabled: true,
@@ -66,6 +66,7 @@ export function usePullHistory() {
         if (card.pity.omg === "hard") pityTriggers.omg++
         if (card.pity.omg === "soft") pityTriggers.omgSoft++
         if (card.pity.brilliant) pityTriggers.brilliant++
+        if (card.pity.ultra) pityTriggers.ultra++
         if (card.rarity === "omg") {
           omgPulls.push({ pullNumber: h.totalCards + i + 1, pity: card.pity.omg })
         }

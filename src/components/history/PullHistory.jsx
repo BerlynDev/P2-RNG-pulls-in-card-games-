@@ -71,8 +71,9 @@ export function PullHistory({ history, onReset }) {
       </table>
 
       <p className="mt-3 text-sm text-indigo-200">
-        Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"} and {pityTriggers.omg} Ñ
-        {" "}(hard pity). Soft pity helped with {pityTriggers.omgSoft} Ñ.
+        Pity forced {pityTriggers.brilliant} brilliant{pityTriggers.brilliant === 1 ? "" : "s"},
+        {" "}{pityTriggers.ultra} ultra-or-better and {pityTriggers.omg} Ñ (hard pity).
+        {" "}Soft pity helped with {pityTriggers.omgSoft} Ñ.
       </p>
 
       {/* Every Ñ ever pulled */}
@@ -102,8 +103,8 @@ export function PullHistory({ history, onReset }) {
             {pack.cards.map((card, i) => (
               <span
                 key={i}
-                title={`${card.rarity}${card.brilliant ? ", brilliant" : ""}${card.pity?.omg || card.pity?.brilliant ? ", forced by pity" : ""}`}
-                className={`flex h-7 w-7 items-center justify-center rounded text-sm font-bold ${chipStyles[card.rarity]} ${card.brilliant ? "ring-2 ring-yellow-300" : ""} ${card.pity?.omg || card.pity?.brilliant ? "outline-2 outline-offset-2 outline-dashed outline-yellow-300" : ""}`}
+                title={`${card.rarity}${card.brilliant ? ", brilliant" : ""}${card.pity?.omg || card.pity?.brilliant || card.pity?.ultra ? ", forced by pity" : ""}`}
+                className={`flex h-7 w-7 items-center justify-center rounded text-sm font-bold ${chipStyles[card.rarity]} ${card.brilliant ? "ring-2 ring-yellow-300" : ""} ${card.pity?.omg || card.pity?.brilliant || card.pity?.ultra ? "outline-2 outline-offset-2 outline-dashed outline-yellow-300" : ""}`}
               >
                 {card.name}
               </span>

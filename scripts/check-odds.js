@@ -8,7 +8,7 @@
 import { pulling_cards_function, pityChance } from "../src/components/homepage/pulling_cards_function.js"
 import { cardPool } from "../src/components/data/card-pool.js"
 import { rarities, BRILLIANT_CHANCE } from "../src/components/data/rarities.js"
-import { PITY_RULES, START_PITY } from "../src/components/data/pity.js"
+import { PITY_RULES, START_PITY, ULTRA_OR_BETTER } from "../src/components/data/pity.js"
 
 const PULLS = 1_000_000
 
@@ -49,6 +49,17 @@ const rows = Object.entries(rarities).map(([rarity, chance]) => ({
   "Got (pity)": pct((withPity[rarity] ?? 0) / PULLS),
   "Predicted (pity)": rarity === "omg" ? pct(predictedRate(chance, PITY_RULES.omg)) : "",
 }))
+// Ultra or better is a group, so add up its rarities. The prediction is
+// approximate (≈): Ñ soft pity also adds a few extra Ñ to this group.
+const ultraOrBetterBase = ULTRA_OR_BETTER.reduce((sum, r) => sum + rarities[r], 0)
+const groupCount = (counts) => ULTRA_OR_BETTER.reduce((sum, r) => sum + (counts[r] ?? 0), 0)
+rows.push({
+  Rarity: "ultra or better",
+  "Base odds": pct(ultraOrBetterBase),
+  "Got (no pity)": pct(groupCount(noPity) / PULLS),
+  "Got (pity)": pct(groupCount(withPity) / PULLS),
+  "Predicted (pity)": `≈ ${pct(predictedRate(ultraOrBetterBase, PITY_RULES.ultraOrBetter))}`,
+})
 rows.push({
   Rarity: "brilliant",
   "Base odds": pct(BRILLIANT_CHANCE),
@@ -60,6 +71,6 @@ rows.push({
 const total = Object.values(rarities).reduce((a, b) => a + b, 0)
 const { omg } = PITY_RULES
 console.log(`${PULLS.toLocaleString()} pulls per run · rarity chances add up to ${(total * 100).toFixed(2)}%`)
-console.log(`Pity: brilliant by pull ${PITY_RULES.brilliant.hard} · Ñ soft pity from pull ${omg.softStart} (+${(omg.softStep * 100).toFixed(1)}% per pull), hard pity at ${omg.hard}`)
+console.log(`Pity: brilliant by pull ${PITY_RULES.brilliant.hard} · ultra or better by pull ${PITY_RULES.ultraOrBetter.hard} · Ñ soft pity from pull ${omg.softStart} (+${(omg.softStep * 100).toFixed(1)}% per pull), hard pity at ${omg.hard}`)
 console.table(rows)
 console.log("Note: pity boosts Ñ, so with pity on the other rarities shrink slightly to make room.")

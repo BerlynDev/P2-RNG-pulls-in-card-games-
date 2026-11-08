@@ -1,4 +1,4 @@
-import { PITY_RULES } from "../data/pity.js"
+import { PITY_RULES, ULTRA_OR_BETTER } from "../data/pity.js"
 import { rarities, BRILLIANT_CHANCE } from "../data/rarities.js"
 import { pityChance } from "../homepage/pulling_cards_function.js"
 
@@ -66,6 +66,13 @@ export function PityPanel({ pity, enabled, onToggle }) {
       </div>
       <div className="space-y-3">
         <PityMeter label="✨ Brilliant" misses={pity.sinceBrilliant} rule={PITY_RULES.brilliant} baseChance={BRILLIANT_CHANCE} enabled={enabled} />
+        <PityMeter
+          label="Ultra or better"
+          misses={pity.sinceUltraOrBetter}
+          rule={PITY_RULES.ultraOrBetter}
+          baseChance={ULTRA_OR_BETTER.reduce((sum, r) => sum + rarities[r], 0)}
+          enabled={enabled}
+        />
         <PityMeter label="Ñ (OMG)" misses={pity.sinceOmg} rule={PITY_RULES.omg} baseChance={rarities.omg} enabled={enabled} />
       </div>
     </section>

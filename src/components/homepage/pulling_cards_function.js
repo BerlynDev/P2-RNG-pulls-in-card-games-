@@ -1,5 +1,5 @@
 import { BRILLIANT_CHANCE } from "../data/rarities.js"
-import { START_PITY } from "../data/pity.js"
+import { START_PITY, ULTRA_OR_BETTER } from "../data/pity.js"
 
 // Picks a rarity using its weight.
 // Lines the chances up one after another on a 0–1 ruler:
@@ -41,6 +41,18 @@ export function withChance(rarities, rarity, newChance) {
   return adjusted
 }
 
+// Returns a copy of the odds that only allows the listed rarities, keeping
+// their relative weights. Everything else gets 0.
+//   Example: only ultra (0.099) and omg (0.001) -> ultra 0.99, omg 0.01
+export function onlyRarities(rarities, allowed) {
+  const total = allowed.reduce((sum, name) => sum + rarities[name], 0)
+  const limited = {}
+  for (const [name, chance] of Object.entries(rarities)) {
+    limited[name] = allowed.includes(name) ? chance / total : 0
+  }
+  return limited
+}
+
 // Pulls one card.
 //   pity  = current counters, e.g. { sinceBrilliant: 9, sinceOmg: 42 }
 //   rules = PITY_RULES to turn pity on, or null to turn it off
@@ -48,7 +60,15 @@ export function withChance(rarities, rarity, newChance) {
 export function pullCard(cardPool, rarities, pity = START_PITY, rules = null) {
   // 1. Rarity. The Ñ chance depends on how long you've gone without one.
   const omgChance = pityChance(rarities.omg, pity.sinceOmg + 1, rules?.omg)
-  const rarity = pickRarity(withChance(rarities, "omg", omgChance))
+  let odds = withChance(rarities, "omg", omgChance)
+
+  // Ultra-or-better pity: on the guaranteed pull, only ultra and Ñ can come
+  // out, still in their usual proportion (99% ultra, 1% Ñ).
+  const sinceUltraOrBetter = pity.sinceUltraOrBetter ?? 0
+  const ultraGuaranteed = rules?.ultraOrBetter !== undefined && sinceUltraOrBetter + 1 >= rules.ultraOrBetter.hard
+  if (ultraGuaranteed) odds = onlyRarities(odds, ULTRA_OR_BETTER)
+
+  const rarity = pickRarity(odds)
 
   // 2. A random card of that rarity.
   const options = cardPool.filter((card) => card.rarity === rarity)
@@ -66,7 +86,7 @@ export function pullCard(cardPool, rarities, pity = START_PITY, rules = null) {
     name: brilliant ? base.name.toUpperCase() : base.name,
     brilliant,
     // What pity did for this card, so the UI can tag it.
-    pity: { omg: omgPity, brilliant: brilliant && brilliantChance === 1 },
+    pity: { omg: omgPity, brilliant: brilliant && brilliantChance === 1, ultra: ultraGuaranteed },
   }
 
   // 4. Update the counters: back to 0 when we got it, otherwise one more miss.
@@ -74,6 +94,7 @@ export function pullCard(cardPool, rarities, pity = START_PITY, rules = null) {
   const nextPity = {
     ...pity,
     sinceOmg: rarity === "omg" ? 0 : pity.sinceOmg + 1,
+    sinceUltraOrBetter: ULTRA_OR_BETTER.includes(rarity) ? 0 : sinceUltraOrBetter + 1,
     sinceBrilliant: brilliant ? 0 : pity.sinceBrilliant + 1,
   }
 

@@ -41,12 +41,12 @@ export function Card({ card, index = 0 }) {
               {card.brilliant && <span className="mt-1 text-xs">✨ brilliant</span>}
 
               {/* Tag for results pity helped with: forced (PITY) or boosted (SOFT PITY) */}
-              {(card.pity?.omg === "hard" || card.pity?.brilliant) && (
+              {(card.pity?.omg === "hard" || card.pity?.brilliant || card.pity?.ultra) && (
                 <span className="absolute top-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-yellow-300">
                   PITY
                 </span>
               )}
-              {card.pity?.omg === "soft" && !card.pity?.brilliant && (
+              {card.pity?.omg === "soft" && !card.pity?.brilliant && !card.pity?.ultra && (
                 <span className="absolute top-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-pink-300">
                   SOFT PITY
                 </span>
