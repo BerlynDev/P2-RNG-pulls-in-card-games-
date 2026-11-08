@@ -1,4 +1,6 @@
-# RNG Pulls in Card Games
+# Gacha Pull Simulator
+
+**▶ Try it live: https://berlyndev.github.io/gacha-pull-simulator/**
 
 This is a JavaScript RNG (Random Number Generator) practice: a card pack simulator that shows how "gacha" pulls work, including rarity odds, rare variants and a pity system.
 
