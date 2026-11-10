@@ -8,9 +8,9 @@
   <sub>https://berlyndev.github.io/gacha-pull-simulator/</sub>
 </p>
 
-This is a JavaScript RNG (Random Number Generator) practice: a card pack simulator that shows how "gacha" pulls work, including rarity odds, rare variants and a pity system.
+A gacha pull simulator you can play in the browser: open card packs, chase the 1-in-10,000 **brilliant Ñ**, and see how soft and hard pity change the real odds, with live rate charts and every rate explained in plain language.
 
-Built with **Vite + React + Tailwind CSS**.
+It started as a JavaScript RNG (Random Number Generator) practice project. Built with **Vite + React + Tailwind CSS**.
 
 ## How it works
 
@@ -86,13 +86,26 @@ A line chart of your running rate for Ñ, ultra or better, brilliant or brillian
 
 ## Getting started
 
-You need [Node.js](https://nodejs.org/) **20.19+ or 22.12+** and [pnpm](https://pnpm.io/).
+You need [Node.js](https://nodejs.org/) **20.19+ or 22.12+** and [pnpm](https://pnpm.io/) **12** (the exact version is pinned in `package.json` under `"packageManager"`).
 
 ```bash
-npm install -g pnpm   # only if you don't have pnpm yet
-pnpm install          # install dependencies
-pnpm dev              # start the dev server, then open the URL it prints
+npm install -g pnpm@12   # only if you don't have pnpm 12 yet
+pnpm install             # install dependencies
+pnpm dev                 # start the dev server, then open the URL it prints
 ```
+
+## Deployment
+
+The site is published to **GitHub Pages** automatically: every push to `main` (so every merged pull request) runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), which:
+
+1. installs exactly what `pnpm-lock.yaml` says (`pnpm install --frozen-lockfile`)
+2. runs `pnpm lint`. If it fails, nothing is published
+3. runs `pnpm build`
+4. publishes the `dist/` folder to https://berlyndev.github.io/gacha-pull-simulator/
+
+A deploy takes about 30 seconds. Follow it in the repo's **Actions** tab, or from the terminal with `gh run watch`. To redeploy without a new commit, use **Run workflow** on that same workflow.
+
+`vite.config.js` uses `base: './'` (relative file links), because GitHub Pages serves the site from the `/gacha-pull-simulator/` subfolder instead of the domain root.
 
 ## Scripts
 
@@ -118,6 +131,9 @@ After changing anything, run `pnpm odds` to check the results match.
 ## Project structure
 
 ```
+.github/
+└── workflows/
+    └── deploy.yml                  # builds and publishes the site on every push to main
 src/
 ├── App.jsx                         # page layout and "open pack" logic
 ├── main.jsx                        # starts React
@@ -145,7 +161,7 @@ scripts/
 └── check-odds.js                   # the `pnpm odds` simulation
 ```
 
-## To do
+## Done so far
 
 - [x] The RNG code on JS
 - [x] The visuals of the packs
@@ -158,3 +174,4 @@ scripts/
 - [x] Open 2 packs (10 cards) at once
 - [x] Rate chart
 - [x] Plain-language explanation of every rate
+- [x] Published online with GitHub Pages, deployed automatically on every merge
